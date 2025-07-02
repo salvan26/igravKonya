@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 
-const ADMIN_PASSWORD = "ADMIN123";
+const ADMIN_PASSWORD = "2801394aa";
 
 // Кастомный Input компонент
 const Input: React.FC<{
@@ -126,10 +126,7 @@ const AdminPage = () => {
       <Button onClick={handleLogout} style={{ float: "right" }}>
         Выйти
       </Button>
-      <div style={{ marginTop: 60 }}>
-        {/* Здесь будет редактор форм */}
-        <p>Редактирование форм (будет реализовано)</p>
-      </div>
+      <div style={{ marginTop: 60 }}></div>
     </div>
   );
 };

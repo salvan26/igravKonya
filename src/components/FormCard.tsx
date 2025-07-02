@@ -1,18 +1,243 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import ReactDOM from "react-dom";
+import "../styles/ModalCustom.css";
 
 export type FormCardProps = {
   player1: string;
   player2: string;
   score?: string;
   details?: string;
+  townImg1?: string;
+  heroImg1?: string;
+  townImg2?: string;
+  heroImg2?: string;
+  winner?: 0 | 1 | 2;
+  challenges?: string;
   editable?: boolean;
   onChange?: (data: {
     player1: string;
     player2: string;
     score?: string;
     details?: string;
+    townImg1?: string;
+    heroImg1?: string;
+    townImg2?: string;
+    heroImg2?: string;
+    winner?: 0 | 1 | 2;
+    challenges?: string;
   }) => void;
 };
+
+// Классическое распределение городов и героев (с учётом Fabric/Factory)
+const townImages = [
+  { label: "Stronghold", value: "/img/Stronghold.gif", key: "stronghold" },
+  { label: "Castle", value: "/img/Castle.gif", key: "castle" },
+  { label: "Dungeon", value: "/img/Dungeon.gif", key: "dungeon" },
+  { label: "Fortress", value: "/img/Fortress.gif", key: "fortress" },
+  { label: "Rampart", value: "/img/Rampart.gif", key: "rampart" },
+  { label: "Tower", value: "/img/tower.png", key: "tower" },
+  { label: "Inferno", value: "/img/Inferno.gif", key: "inferno" },
+  { label: "Necropolis", value: "/img/Necropolis.gif", key: "necropolis" },
+  { label: "Conflux", value: "/img/Conflux.gif", key: "conflux" },
+  { label: "Cove", value: "/img/Cove.gif", key: "cove" },
+  { label: "Fabric", value: "/img/Fabric.gif", key: "fabric" },
+];
+
+// Массив героев с городом (city: ключ из townImages)
+const heroImages = [
+  // Stronghold
+  { label: "Crag Hack", value: "/img/CragHack.gif", city: "stronghold" },
+  { label: "Jabarkas", value: "/img/Jabarkas.gif", city: "stronghold" },
+  { label: "Gurnisson", value: "/img/Gurnisson.png", city: "stronghold" },
+  { label: "Gretar", value: "/img/Grethen.png", city: "stronghold" },
+  { label: "Dessa", value: "/img/Dessa.png", city: "stronghold" },
+  { label: "Gird", value: "/img/Gird.png", city: "stronghold" },
+  { label: "Vey", value: "/img/Vei.png", city: "stronghold" },
+  { label: "Shiva", value: "/img/Shiva.png", city: "stronghold" },
+  { label: "Yog", value: "/img/Iog.png", city: "stronghold" },
+  { label: "Boragus", value: "/img/Boragus.png", city: "stronghold" },
+  { label: "Tiraksor", value: "/img/Tiraksor.png", city: "stronghold" },
+  { label: "Gundula", value: "/img/Gundula.png", city: "stronghold" },
+  { label: "Zubin", value: "/img/Zubin.png", city: "stronghold" },
+  { label: "Oris", value: "/img/Oris.png", city: "stronghold" },
+  { label: "Sorug", value: "/img/Sorug.png", city: "stronghold" },
+  { label: "Terek", value: "/img/Terek.png", city: "stronghold" },
+
+  // Castle
+  { label: "Catherine", value: "/img/Catherine.gif", city: "castle" },
+  { label: "Christian", value: "/img/Christian.png", city: "castle" },
+  { label: "Edric", value: "/img/Edric.png", city: "castle" },
+  { label: "Adela", value: "/img/Adela.png", city: "castle" },
+  { label: "Sonya", value: "/img/Sonya.png", city: "castle" },
+  { label: "Sir Mullich", value: "/img/SirMullich.png", city: "castle" },
+  { label: "Valeska", value: "/img/Valeska.png", city: "castle" },
+  { label: "Orrin", value: "/img/Orrin.png", city: "castle" },
+  { label: "Silvia", value: "/img/Silvia.png", city: "castle" },
+  { label: "Sorsha", value: "/img/Sorsha.png", city: "castle" },
+  { label: "Tiris", value: "/img/Tiris.png", city: "castle" },
+  { label: "Adelaida", value: "/img/Adelaida.png", city: "castle" },
+  { label: "Ingam", value: "/img/Ingam.png", city: "castle" },
+  { label: "Katbert", value: "/img/Katbert.png", city: "castle" },
+  { label: "Kaitlin", value: "/img/Kaitlin.png", city: "castle" },
+  { label: "Loinis", value: "/img/Loinis.png", city: "castle" },
+  { label: "Rion", value: "/img/Rion.png", city: "castle" },
+  // Tower
+  { label: "Solmyr", value: "/img/Solmyr.gif", city: "tower" },
+  { label: "Astral", value: "/img/Astral.png", city: "tower" },
+  { label: "Torosar", value: "/img/Torosar.png", city: "tower" },
+  { label: "Jozefina", value: "/img/Жозефина.png", city: "tower" },
+  { label: "Tan", value: "/img/Tan.png", city: "tower" },
+  { label: "Dermit", value: "/img/Dermit.png", city: "tower" },
+  { label: "Rissa", value: "/img/Rissa.png", city: "tower" },
+  { label: "Fafner", value: "/img/Fanfir.png", city: "tower" },
+  { label: "Iona", value: "/img/Иона.png", city: "tower" },
+  { label: "Pikedram", value: "/img/Пикедрам.png", city: "tower" },
+  { label: "Nila", value: "/img/Нила.png", city: "tower" },
+  { label: "Saira", value: "/img/Saira.png", city: "tower" },
+  { label: "Serena", value: "/img/Serena.png", city: "tower" },
+  { label: "Teodorus", value: "/img/Teodorus.png", city: "tower" },
+  { label: "Halon", value: "/img/Halon.png", city: "tower" },
+  { label: "Aine", value: "/img/Aine.png", city: "tower" },
+
+  // Dungeon
+  { label: "Shakti", value: "/img/Shakti.png", city: "dungeon" },
+  { label: "Lorelei", value: "/img/Lorelei.png", city: "dungeon" },
+  { label: "Dace", value: "/img/Daice.png", city: "dungeon" },
+  { label: "Ajit", value: "/img/Adjit.png", city: "dungeon" },
+  { label: "Gunnar", value: "/img/Gunnar.gif", city: "dungeon" },
+  { label: "Yager", value: "/img/Yager.png", city: "dungeon" },
+  { label: "Arluck", value: "/img/Arluck.png", city: "dungeon" },
+  { label: "Damakon", value: "/img/Damakon.png", city: "dungeon" },
+  { label: "Lorelei", value: "/img/Lorelei.png", city: "dungeon" },
+  { label: "Sinka", value: "/img/Sinka.png", city: "dungeon" },
+  { label: "SashaVoodoosh", value: "/img/Alamar.png", city: "dungeon" },
+  { label: "Geon", value: "/img/Geon.png", city: "dungeon" },
+  { label: "DarkStorm", value: "/img/DarkStorm.png", city: "dungeon" },
+  { label: "Djedit", value: "/img/Djedit.png", city: "dungeon" },
+  { label: "Dimer", value: "/img/Dimer.png", city: "dungeon" },
+  { label: "Sefinrot", value: "/img/Sefinrot.png", city: "dungeon" },
+  // Rampart
+  { label: "Ivor", value: "/img/Ivor.png", city: "rampart" },
+  { label: "Kairi", value: "/img/Kairi.png", city: "rampart" },
+  { label: "Klansy", value: "/img/Kansli.png", city: "rampart" },
+  { label: "Mefala", value: "/img/Mefala.png", city: "rampart" },
+  { label: "Riland", value: "/img/Riland.png", city: "rampart" },
+  { label: "Torgrim", value: "/img/Torgrim.png", city: "rampart" },
+  { label: "Ufertin", value: "/img/Ufertin.png", city: "rampart" },
+  { label: "Yanova", value: "/img/Yanova.png", city: "rampart" },
+  { label: "Alagar", value: "/img/Alagar.png", city: "rampart" },
+  { label: "Aeris", value: "/img/Aeris.png", city: "rampart" },
+  { label: "Djam", value: "/img/Djam.png", city: "rampart" },
+  { label: "Koronius", value: "/img/Koronius.png", city: "rampart" },
+  { label: "Malkom", value: "/img/Malkom.png", city: "rampart" },
+  { label: "Melodia", value: "/img/Melodia.png", city: "rampart" },
+  { label: "Uland", value: "/img/Uland.png", city: "rampart" },
+  { label: "Alishar", value: "/img/Alishar.png", city: "rampart" },
+
+  // Inferno
+  { label: "Olema", value: "/img/Olema.png", city: "inferno" },
+  { label: "Xyron", value: "/img/Xyron.png", city: "inferno" },
+  { label: "Ignat", value: "/img/Ignat.png", city: "inferno" },
+  { label: "Kalkh", value: "/img/Kalkh.png", city: "inferno" },
+  { label: "Marius", value: "/img/Marius.png", city: "inferno" },
+  { label: "Nimus", value: "/img/Nimus.png", city: "inferno" },
+  { label: "Oktavia", value: "/img/Oktavia.png", city: "inferno" },
+  { label: "Paira", value: "/img/Paira.png", city: "inferno" },
+  { label: "Rashka", value: "/img/Rashka.png", city: "inferno" },
+  { label: "Fiona", value: "/img/Fiona.png", city: "inferno" },
+  { label: "Aiden", value: "/img/Aiden.png", city: "inferno" },
+  { label: "Aksis", value: "/img/Aksis.png", city: "inferno" },
+  { label: "Zidar", value: "/img/Zidar.png", city: "inferno" },
+  { label: "Kalid", value: "/img/Kalid.png", city: "inferno" },
+  { label: "Ksarfaks", value: "/img/Ksarfaks.png", city: "inferno" },
+  { label: "Ash", value: "/img/Pepel.png", city: "inferno" },
+  // Necropolis
+  { label: "Thant", value: "/img/Thant.png", city: "necropolis" },
+  { label: "Vidomina", value: "/img/Vidomina.png", city: "necropolis" },
+  { label: "Vokial", value: "/img/Vokial.png", city: "necropolis" },
+  { label: "Galtran", value: "/img/Galtran.png", city: "necropolis" },
+  { label: "Isra", value: "/img/Isra.png", city: "necropolis" },
+  { label: "Klavius", value: "/img/Klavius.png", city: "necropolis" },
+  { label: "Moander", value: "/img/Moander.png", city: "necropolis" },
+  { label: "Straker", value: "/img/Stalker.png", city: "necropolis" },
+  { label: "Tamika", value: "/img/Tamika.png", city: "necropolis" },
+  { label: "Charna", value: "/img/Charna.png", city: "necropolis" },
+  { label: "Ksi", value: "/img/Ksi.png", city: "necropolis" },
+  { label: "Nagash", value: "/img/Nagash.png", city: "necropolis" },
+  { label: "Nimbus", value: "/img/Nimbus.png", city: "necropolis" },
+  { label: "Sandro", value: "/img/Sandro.png", city: "necropolis" },
+  { label: "Septina", value: "/img/Septina.png", city: "necropolis" },
+  { label: "Aislin", value: "/img/Aislin.png", city: "necropolis" },
+  // Fortress
+  { label: "Tazar", value: "/img/Tazar.gif", city: "fortress" },
+  { label: "Alkin", value: "/img/Alkin.png", city: "fortress" },
+  { label: "Bron", value: "/img/Bron.png", city: "fortress" },
+  { label: "Brohild", value: "/img/Bronhild.png", city: "fortress" },
+  { label: "Vistan", value: "/img/Vistan.png", city: "fortress" },
+  { label: "Gerwolf", value: "/img/Gerwolf.png", city: "fortress" },
+  { label: "Draikon", value: "/img/Draikon.png", city: "fortress" },
+  { label: "Korbak", value: "/img/Korbak.png", city: "fortress" },
+  { label: "Andra", value: "/img/Andra.png", city: "fortress" },
+  { label: "Verdish", value: "/img/Verdish.png", city: "fortress" },
+  { label: "Voi", value: "/img/Voi.png", city: "fortress" },
+  { label: "Merist", value: "/img/Merist.png", city: "fortress" },
+  { label: "Mirlanda", value: "/img/Mirlanda.png", city: "fortress" },
+  { label: "Rozik", value: "/img/Rozik.png", city: "fortress" },
+  { label: "Stig", value: "/img/Stig.png", city: "fortress" },
+  { label: "Tiva", value: "/img/Tiva.png", city: "fortress" },
+  // Conflux
+  { label: "Luna", value: "/img/Luna.png", city: "conflux" },
+  { label: "Ignissa", value: "/img/Ignissa.png", city: "conflux" },
+  { label: "Kalt", value: "/img/Kalt.png", city: "conflux" },
+  { label: "Lakus", value: "/img/Lakus.png", city: "conflux" },
+  { label: "Monner", value: "/img/Monner.png", city: "conflux" },
+  { label: "Passisa", value: "/img/Passisa.png", city: "conflux" },
+  { label: "Tunar", value: "/img/Tunar.png", city: "conflux" },
+  { label: "Fiur", value: "/img/Fiur.png", city: "conflux" },
+  { label: "Erdamon", value: "/img/Erdamon.png", city: "conflux" },
+  { label: "Brissa", value: "/img/Brissa.png", city: "conflux" },
+  { label: "Grindan", value: "/img/Grindan.png", city: "conflux" },
+  { label: "Djelar", value: "/img/Djelar.png", city: "conflux" },
+  { label: "Intei", value: "/img/Intei.png", city: "conflux" },
+  { label: "Labeta", value: "/img/Labeta.png", city: "conflux" },
+  { label: "Ciel", value: "/img/Ciel.png", city: "conflux" },
+  { label: "Anein", value: "/img/Anein.png", city: "conflux" },
+  // Cove
+  { label: "Anabel", value: "/img/Anabel.png", city: "cove" },
+  { label: "Andal", value: "/img/Andal.png", city: "cove" },
+  { label: "Derek", value: "/img/Derek.png", city: "cove" },
+  { label: "Miriam", value: "/img/Miriam.png", city: "cove" },
+  { label: "Astra", value: "/img/Astra.png", city: "cove" },
+  { label: "Dargem", value: "/img/Dargem.png", city: "cove" },
+  { label: "Djeremy", value: "/img/Djeremy.png", city: "cove" },
+  { label: "Zilar", value: "/img/Zilar.png", city: "cove" },
+  { label: "Illor", value: "/img/Illor.png", city: "cove" },
+  { label: "Kasmetra", value: "/img/Kasmetra.png", city: "cove" },
+  { label: "Kasseopea", value: "/img/Kasseopea.png", city: "cove" },
+  { label: "Korkes", value: "/img/Korkes.png", city: "cove" },
+  { label: "Lina", value: "/img/Lina.png", city: "cove" },
+  { label: "Manfred", value: "/img/Manfred.png", city: "cove" },
+  { label: "Spint", value: "/img/Spint.png", city: "cove" },
+  { label: "Elmor", value: "/img/Elmor.png", city: "cove" },
+  { label: "Eovacii", value: "/img/Eovacii.png", city: "cove" },
+  // Fabric/Factory (Horn of the Abyss)
+  { label: "Sam", value: "/img/Sam.png", city: "fabric" },
+  { label: "Agar", value: "/img/Agar.png", city: "fabric" },
+  { label: "Bertram", value: "/img/Bertram.png", city: "fabric" },
+  { label: "Tancred", value: "/img/Tankred.png", city: "fabric" },
+  { label: "Floriber", value: "/img/Floriber.png", city: "fabric" },
+  { label: "Melhior", value: "/img/Melhior.png", city: "fabric" },
+  { label: "Morton", value: "/img/Morton.png", city: "fabric" },
+  { label: "Victoria", value: "/img/Victoria.png", city: "fabric" },
+  { label: "Wynona", value: "/img/Vainona.png", city: "fabric" },
+  { label: "Esvita", value: "/img/Esvita.png", city: "fabric" },
+  { label: "Celestina", value: "/img/Selestina.png", city: "fabric" },
+  { label: "Dury", value: "/img/Diuri.png", city: "fabric" },
+  { label: "Racmont", value: "/img/Racmont.png", city: "fabric" },
+  { label: "Genrietta", value: "/img/Genrietta.png", city: "fabric" },
+  { label: "Zif", value: "/img/Zif.png", city: "fabric" },
+  { label: "Todd", value: "/img/Todd.png", city: "fabric" },
+];
 
 // Кастомный Input компонент
 const Input: React.FC<{
@@ -51,7 +276,7 @@ const TextArea: React.FC<{
     rows={rows}
     style={{
       padding: "8px 12px",
-      border: "1px solid #d9d9d9",
+      border: "1px solidrgb(70, 63, 63)",
       borderRadius: "6px",
       fontSize: "14px",
       outline: "none",
@@ -93,65 +318,20 @@ const Modal: React.FC<{
   footer?: React.ReactNode;
 }> = ({ open, onCancel, title, children, footer }) => {
   if (!open) return null;
-
-  return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 1000,
-      }}
-      onClick={onCancel}
-    >
-      <div
-        style={{
-          backgroundColor: "#fff",
-          borderRadius: "8px",
-          padding: "24px",
-          minWidth: "400px",
-          maxWidth: "600px",
-          maxHeight: "80vh",
-          overflow: "auto",
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "16px",
-            fontSize: "16px",
-            fontWeight: "bold",
-          }}
-        >
+  return ReactDOM.createPortal(
+    <div className="modal-overlay" onClick={onCancel}>
+      <div className="modal-window" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-title">
           {title}
-          <button
-            onClick={onCancel}
-            style={{
-              background: "none",
-              border: "none",
-              fontSize: "18px",
-              cursor: "pointer",
-              padding: "0",
-              width: "24px",
-              height: "24px",
-            }}
-          >
+          <button className="modal-close" onClick={onCancel}>
             ×
           </button>
         </div>
         <div style={{ marginBottom: "16px" }}>{children}</div>
         {footer && <div style={{ textAlign: "right" }}>{footer}</div>}
       </div>
-    </div>
+    </div>,
+    typeof window !== "undefined" ? document.body : (null as any)
   );
 };
 
@@ -162,36 +342,163 @@ const InfoBlock: React.FC<{
   player2: string;
   score?: string;
   details?: string;
-}> = ({ visible, player1, player2, score, details }) => {
+  townImg1?: string;
+  heroImg1?: string;
+  townImg2?: string;
+  heroImg2?: string;
+  winner?: 0 | 1 | 2;
+  challenges?: string;
+  align?: "left" | "right";
+  left?: number;
+  top?: number;
+  className?: string;
+}> = ({
+  visible,
+  player1,
+  player2,
+  score,
+  details,
+  townImg1,
+  heroImg1,
+  townImg2,
+  heroImg2,
+  winner,
+  challenges,
+  align = "right",
+  left = 0,
+  top = 0,
+  className = "",
+}) => {
   if (!visible) return null;
-
-  return (
+  const challengeList = (challenges || "").split("\n").filter(Boolean);
+  return ReactDOM.createPortal(
     <div
-      style={{
-        position: "absolute",
-        top: "100%",
-        left: "50%",
-        transform: "translateX(-50%)",
-        backgroundColor: "#fff",
-        border: "1px solid #d9d9d9",
-        borderRadius: "6px",
-        padding: "12px",
-        minWidth: "200px",
-        maxWidth: "300px",
-        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
-        zIndex: 1000,
-        marginTop: "8px",
-      }}
+      className={`info-block ${className} info-block--${align}`}
+      style={{ position: "fixed", left, top, zIndex: 9999 }}
     >
-      <div style={{ fontWeight: "bold", marginBottom: "8px" }}>
-        {player1} {score && <span style={{ color: "#1890ff" }}>{score}</span>}{" "}
-        {player2}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          marginBottom: 8,
+        }}
+      >
+        {townImg1 && (
+          <img
+            src={townImg1}
+            alt="Город 1"
+            width={32}
+            height={32}
+            style={{ borderRadius: 4, background: "#fff" }}
+          />
+        )}
+        {heroImg1 && (
+          <img
+            src={heroImg1}
+            alt="Герой 1"
+            width={32}
+            height={32}
+            style={{ borderRadius: 4, background: "#fff" }}
+          />
+        )}
+        <span
+          style={{
+            fontWeight: winner === 1 ? 800 : 300,
+            color: winner === 1 ? "#222" : "#888",
+            display: "flex",
+            alignItems: "center",
+            gap: 4,
+          }}
+        >
+          {player1}{" "}
+          {winner === 1 && (
+            <span title="Победитель" style={{ fontSize: 18, marginLeft: 2 }}>
+              🏆
+            </span>
+          )}
+        </span>
+        {score && (
+          <span style={{ color: "#1890ff", fontWeight: 500, margin: "0 4px" }}>
+            {score}
+          </span>
+        )}
+        <span
+          style={{
+            fontWeight: winner === 2 ? 800 : 300,
+            color: winner === 2 ? "#222" : "#888",
+            display: "flex",
+            alignItems: "center",
+            gap: 4,
+          }}
+        >
+          {player2}{" "}
+          {winner === 2 && (
+            <span title="Победитель" style={{ fontSize: 18, marginLeft: 2 }}>
+              🏆
+            </span>
+          )}
+        </span>
+        {heroImg2 && (
+          <img
+            src={heroImg2}
+            alt="Герой 2"
+            width={32}
+            height={32}
+            style={{ borderRadius: 4, background: "#fff" }}
+          />
+        )}
+        {townImg2 && (
+          <img
+            src={townImg2}
+            alt="Город 2"
+            width={32}
+            height={32}
+            style={{ borderRadius: 4, background: "#fff" }}
+          />
+        )}
       </div>
       {details && (
-        <div style={{ fontSize: "14px", color: "#666" }}>{details}</div>
+        <ul style={{ fontSize: "14px", color: "#fff", paddingLeft: 18 }}>
+          {details.split("\n").map((line, i) => (
+            <li key={i}>{line}</li>
+          ))}
+        </ul>
       )}
-    </div>
+      {challengeList.length > 0 && (
+        <ul
+          style={{
+            fontSize: "15px",
+            color: "#fff",
+            paddingLeft: 18,
+            marginTop: 8,
+          }}
+        >
+          {challengeList.map((line, i) => (
+            <li
+              key={i}
+              style={{
+                listStyle: "none",
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+              }}
+            >
+              <span style={{ fontSize: 18 }}>🎯</span> {line}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>,
+    document.body
   );
+};
+
+// Вспомогательная функция для фильтрации героев по городу
+const getHeroesByTown = (townImg: string) => {
+  const town = townImages.find((t) => t.value === townImg);
+  if (!town) return [];
+  return heroImages.filter((h) => h.city === town.key);
 };
 
 const FormCard: React.FC<FormCardProps> = ({
@@ -199,16 +506,34 @@ const FormCard: React.FC<FormCardProps> = ({
   player2,
   score,
   details,
+  townImg1,
+  heroImg1,
+  townImg2,
+  heroImg2,
+  winner,
+  challenges,
   editable,
   onChange,
 }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [infoVisible, setInfoVisible] = useState(false);
+  const [infoAlign, setInfoAlign] = useState<"left" | "right">("right");
+  const [infoPos, setInfoPos] = useState<{ left: number; top: number }>({
+    left: 0,
+    top: 0,
+  });
+  const cardRef = useRef<HTMLDivElement>(null);
   const [editData, setEditData] = useState({
     player1,
     player2,
     score: score || "",
     details: details || "",
+    townImg1: townImg1 || "",
+    heroImg1: heroImg1 || "",
+    townImg2: townImg2 || "",
+    heroImg2: heroImg2 || "",
+    winner: (winner ?? 0) as 0 | 1 | 2,
+    challenges: challenges || "",
   });
 
   const handleModalOpen = () => {
@@ -217,6 +542,12 @@ const FormCard: React.FC<FormCardProps> = ({
       player2,
       score: score || "",
       details: details || "",
+      townImg1: townImg1 || "",
+      heroImg1: heroImg1 || "",
+      townImg2: townImg2 || "",
+      heroImg2: heroImg2 || "",
+      winner: (winner ?? 0) as 0 | 1 | 2,
+      challenges: challenges || "",
     });
     setModalOpen(true);
   };
@@ -224,12 +555,63 @@ const FormCard: React.FC<FormCardProps> = ({
   const handleModalClose = () => setModalOpen(false);
 
   const handleSave = () => {
-    onChange?.(editData);
+    onChange?.({
+      ...editData,
+      winner: Number(editData.winner) as 0 | 1 | 2,
+    });
     setModalOpen(false);
   };
 
+  // Показывать инфоблок только при наведении на форму
+  const showInfo = () => {
+    if (cardRef.current) {
+      const rect = cardRef.current.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const align = centerX > window.innerWidth * 0.6 ? "left" : "right";
+      setInfoAlign(align);
+      const infoWidth = 360;
+      const infoBlockHeight = 320;
+      let top = rect.top;
+      if (top + infoBlockHeight > window.innerHeight - 10) {
+        top = window.innerHeight - infoBlockHeight - 10;
+      }
+      if (top < 10) top = 10;
+      const left =
+        align === "right" ? rect.right + 200 : rect.left - infoWidth + 180;
+      setInfoPos({ left, top });
+    }
+    setInfoVisible(true);
+  };
+  const hideInfo = () => setInfoVisible(false);
+
+  // В форме выводим мишени
+  const challengeCount = (editData.challenges || "")
+    .split("\n")
+    .filter(Boolean).length;
+
   return (
-    <div style={{ position: "relative" }}>
+    <div style={{ position: "relative" }} ref={cardRef}>
+      {/* Мишени над формой */}
+      {challengeCount > 0 && (
+        <span
+          style={{
+            position: "absolute",
+            top: -58,
+            left: "55%",
+            transform: "translateX(-50%)",
+            fontSize: 25,
+            zIndex: 2,
+            pointerEvents: "none",
+            display: "flex", // добавлено!
+            flexDirection: "row", // добавлено!
+            gap: 4,
+          }}
+        >
+          {Array.from({ length: challengeCount }).map((_, i) => (
+            <span key={i}>🎯</span>
+          ))}
+        </span>
+      )}
       <div
         style={{
           display: "grid",
@@ -253,15 +635,12 @@ const FormCard: React.FC<FormCardProps> = ({
           transition: "color 0.2s",
         }}
         onClick={editable ? handleModalOpen : undefined}
-        onMouseEnter={!editable ? () => setInfoVisible(true) : undefined}
-        onMouseLeave={!editable ? () => setInfoVisible(false) : undefined}
+        onMouseEnter={!editable ? showInfo : undefined}
+        onMouseLeave={!editable ? hideInfo : undefined}
       >
         <span style={{ fontSize: 16 }}>{player1}</span>
-        <span style={{ fontSize: 14, color: "#7a5c2b", fontWeight: 400 }}>
-          {player2}
-        </span>
+        <span style={{ fontSize: 16 }}>{player2}</span>
       </div>
-
       {/* Информационный блок для обычных пользователей */}
       {!editable && (
         <InfoBlock
@@ -270,9 +649,18 @@ const FormCard: React.FC<FormCardProps> = ({
           player2={player2}
           score={score}
           details={details}
+          townImg1={townImg1}
+          heroImg1={heroImg1}
+          townImg2={townImg2}
+          heroImg2={heroImg2}
+          winner={winner}
+          challenges={challenges}
+          align={infoAlign}
+          left={infoPos.left}
+          top={infoPos.top}
+          className={`info-block--${infoAlign}`}
         />
       )}
-
       {/* Модальное окно для админа */}
       <Modal
         open={modalOpen}
@@ -322,15 +710,144 @@ const FormCard: React.FC<FormCardProps> = ({
         }
       >
         {editable ? (
-          <TextArea
-            value={editData.details}
-            onChange={(e) =>
-              setEditData((d) => ({ ...d, details: e.target.value }))
-            }
-            placeholder="Задание/условия"
-          />
+          <>
+            <label style={{ display: "block", marginBottom: 4 }}>
+              Город 1:
+            </label>
+            <select
+              value={editData.townImg1}
+              onChange={(e) =>
+                setEditData((d) => ({ ...d, townImg1: e.target.value }))
+              }
+              style={{
+                marginBottom: 8,
+                width: "100%",
+                padding: 6,
+                borderRadius: 6,
+              }}
+            >
+              <option value="">Выберите город</option>
+              {townImages.map((img) => (
+                <option key={img.value} value={img.value}>
+                  {img.label}
+                </option>
+              ))}
+            </select>
+            <label style={{ display: "block", marginBottom: 4 }}>
+              Герой 1:
+            </label>
+            <select
+              value={editData.heroImg1}
+              onChange={(e) =>
+                setEditData((d) => ({ ...d, heroImg1: e.target.value }))
+              }
+              style={{
+                marginBottom: 8,
+                width: "100%",
+                padding: 6,
+                borderRadius: 6,
+              }}
+            >
+              <option value="">Выберите героя</option>
+              {getHeroesByTown(editData.townImg1).map((img) => (
+                <option key={img.value} value={img.value}>
+                  {img.label}
+                </option>
+              ))}
+            </select>
+            <label style={{ display: "block", marginBottom: 4 }}>
+              Город 2:
+            </label>
+            <select
+              value={editData.townImg2}
+              onChange={(e) =>
+                setEditData((d) => ({ ...d, townImg2: e.target.value }))
+              }
+              style={{
+                marginBottom: 8,
+                width: "100%",
+                padding: 6,
+                borderRadius: 6,
+              }}
+            >
+              <option value="">Выберите город</option>
+              {townImages.map((img) => (
+                <option key={img.value} value={img.value}>
+                  {img.label}
+                </option>
+              ))}
+            </select>
+            <label style={{ display: "block", marginBottom: 4 }}>
+              Герой 2:
+            </label>
+            <select
+              value={editData.heroImg2}
+              onChange={(e) =>
+                setEditData((d) => ({ ...d, heroImg2: e.target.value }))
+              }
+              style={{
+                marginBottom: 8,
+                width: "100%",
+                padding: 6,
+                borderRadius: 6,
+              }}
+            >
+              <option value="">Выберите героя</option>
+              {getHeroesByTown(editData.townImg2).map((img) => (
+                <option key={img.value} value={img.value}>
+                  {img.label}
+                </option>
+              ))}
+            </select>
+            <label style={{ display: "block", marginBottom: 4 }}>
+              Победитель:
+            </label>
+            <select
+              value={editData.winner}
+              onChange={(e) =>
+                setEditData((d) => ({
+                  ...d,
+                  winner: Number(e.target.value) as 0 | 1 | 2,
+                }))
+              }
+              style={{
+                marginBottom: 8,
+                width: "100%",
+                padding: 6,
+                borderRadius: 6,
+              }}
+            >
+              <option value={0}>Нет победителя</option>
+              <option value={1}>Игрок 1</option>
+              <option value={2}>Игрок 2</option>
+            </select>
+            <TextArea
+              value={editData.details}
+              onChange={(e) =>
+                setEditData((d) => ({ ...d, details: e.target.value }))
+              }
+              placeholder="Задание/условия (каждая строка — отдельный пункт)"
+            />
+            <label style={{ display: "block", margin: "8px 0 4px" }}>
+              Выполненные челленджи:
+            </label>
+            <TextArea
+              value={editData.challenges}
+              onChange={(e) =>
+                setEditData((d) => ({ ...d, challenges: e.target.value }))
+              }
+              placeholder="Каждая строка — отдельный челлендж"
+              rows={3}
+            />
+          </>
+        ) : details ? (
+          <ul style={{ fontSize: "14px", color: "#222", paddingLeft: 18 }}>
+            {details.split("\n").map((line, i) => (
+              <li key={i}>{line}</li>
+            ))}
+          </ul>
         ) : (
-          <div>{details || "Задание/условия появятся здесь"}</div>
+          <div>Задание/условия появятся здесь</div>
         )}
       </Modal>
     </div>
