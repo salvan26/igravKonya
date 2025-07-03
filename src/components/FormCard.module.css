@@ -1,3 +1,54 @@
 .card {
-  top: 10px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.01);
+  border-radius: 10px;
+  box-shadow: 0 0 0 2px transparent;
+  transition: box-shadow 0.2s;
+  padding: 6px;
+  width: auto;
+  height: auto;
+  min-width: 0;
+  min-height: 0;
+}
+
+.challengesAbove {
+  position: absolute;
+  top: -58px;
+  left: 55%;
+  transform: translateX(-50%);
+  font-size: 25px;
+  z-index: 2;
+  pointer-events: none;
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+}
+
+.playersBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-weight: 600;
+  background: none;
+  border: none;
+  box-shadow: none;
+  color: #222;
+  font-size: 16px;
+  line-height: 1.2;
+  padding: 0;
+  margin: 0;
+  user-select: none;
+  row-gap: 2px;
+  transition: color 0.2s;
+  width: auto;
+}
+
+.player {
+  font-size: 12px;
+  padding: 5px;
 }

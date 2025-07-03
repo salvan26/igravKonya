@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import ReactDOM from "react-dom";
 import styles from "@/styles/ModalCustom.module.css";
+import formCardStyles from "./FormCard.module.css";
 
 export type FormCardProps = {
   player1: string;
@@ -384,75 +385,51 @@ const InfoBlock: React.FC<{
 }) => {
   if (!visible) return null;
   const challengeList = (challenges || "").split("\n").filter(Boolean);
-  return ReactDOM.createPortal(
+  return (
     <div
-      className={`${styles.infoBlock} ${className} ${
+      className={`${styles.infoBlock} ${
         align === "right" ? styles.infoBlockRight : styles.infoBlockLeft
-      }`}
-      style={{ position: "fixed", left, top, zIndex: 9999, ...style }}
+      } ${className}`}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
+      style={style}
     >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          marginBottom: 8,
-        }}
-      >
+      <div className={styles.infoBlockRow}>
         {townImg1 && (
           <img
             src={townImg1}
             alt="Город 1"
-            width={32}
-            height={32}
-            style={{ borderRadius: 4, background: "#fff" }}
+            className={styles.infoBlockTownImg}
           />
         )}
         {heroImg1 && (
           <img
             src={heroImg1}
             alt="Герой 1"
-            width={32}
-            height={32}
-            style={{ borderRadius: 4, background: "#fff" }}
+            className={styles.infoBlockHeroImg}
           />
         )}
         <span
-          style={{
-            fontWeight: winner === 1 ? 800 : 300,
-            color: winner === 1 ? "#222" : "#888",
-            display: "flex",
-            alignItems: "center",
-            gap: 4,
-          }}
+          className={
+            winner === 1 ? styles.infoBlockWinner : styles.infoBlockLoser
+          }
         >
-          {player1}{" "}
+          {player1}
           {winner === 1 && (
-            <span title="Победитель" style={{ fontSize: 18, marginLeft: 2 }}>
+            <span title="Победитель" className={styles.infoBlockTrophy}>
               🏆
             </span>
           )}
         </span>
-        {score && (
-          <span style={{ color: "#1890ff", fontWeight: 500, margin: "0 4px" }}>
-            {score}
-          </span>
-        )}
-
+        {score && <span className={styles.infoBlockScore}>{score}</span>}
         <span
-          style={{
-            fontWeight: winner === 2 ? 800 : 300,
-            color: winner === 2 ? "#222" : "#888",
-            display: "flex",
-            alignItems: "center",
-            gap: 4,
-          }}
+          className={
+            winner === 2 ? styles.infoBlockWinner : styles.infoBlockLoser
+          }
         >
-          {player2}{" "}
+          {player2}
           {winner === 2 && (
-            <span title="Победитель" style={{ fontSize: 18, marginLeft: 2 }}>
+            <span title="Победитель" className={styles.infoBlockTrophy}>
               🏆
             </span>
           )}
@@ -461,73 +438,50 @@ const InfoBlock: React.FC<{
           <img
             src={heroImg2}
             alt="Герой 2"
-            width={32}
-            height={32}
-            style={{ borderRadius: 4, background: "#fff" }}
+            className={styles.infoBlockHeroImg}
           />
         )}
         {townImg2 && (
           <img
             src={townImg2}
             alt="Город 2"
-            width={32}
-            height={32}
-            style={{ borderRadius: 4, background: "#fff" }}
+            className={styles.infoBlockTownImg}
           />
         )}
       </div>
       {videoLink && (
-        <div style={{ marginTop: 8, fontSize: "14px", color: "#fff" }}>
+        <div className={styles.infoBlockVideoLink}>
           Летопись битвы:{" "}
           <a
             href={videoLink}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ color: "#1890ff" }}
+            className={styles.infoBlockVideoAnchor}
           >
             ▶️
           </a>
         </div>
       )}
       {details && (
-        <ul style={{ fontSize: "14px", color: "#fff", paddingLeft: 18 }}>
+        <ul className={styles.infoBlockDetails}>
           {details.split("\n").map((line, i) => (
-            <li key={i}>{line}</li>
-          ))}
-        </ul>
-      )}
-
-      {challengeList.length > 0 && (
-        <ul
-          style={{
-            fontSize: "15px",
-            color: "#fff",
-            paddingLeft: 18,
-            marginTop: 8,
-          }}
-        >
-          {challengeList.map((line, i) => (
-            <li
-              key={i}
-              style={{
-                listStyle: "none",
-                display: "flex",
-                alignItems: "center",
-                gap: 4,
-              }}
-            >
-              <span style={{ fontSize: 18 }}>🎯</span> {line}
+            <li key={i} className={styles.infoBlockDetailsItem}>
+              {line}
             </li>
           ))}
         </ul>
       )}
-      {date && (
-        <div style={{ marginTop: 8, fontSize: "14px", color: "#fff" }}>
-          Дата: {date}
-        </div>
+      {challengeList.length > 0 && (
+        <ul className={styles.infoBlockChallenges}>
+          {challengeList.map((line, i) => (
+            <li key={i} className={styles.infoBlockChallengeItem}>
+              <span className={styles.infoBlockChallengeIcon}>🎯</span> {line}
+            </li>
+          ))}
+        </ul>
       )}
-    </div>,
-    document.body
+      {date && <div className={styles.infoBlockDate}>Дата: {date}</div>}
+    </div>
   );
 };
 
@@ -611,19 +565,9 @@ const FormCard: React.FC<FormCardProps> = ({
   const showInfo = () => {
     if (cardRef.current) {
       const rect = cardRef.current.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const align = centerX > window.innerWidth * 0.6 ? "left" : "right";
+      const align =
+        rect.left + rect.width / 2 > window.innerWidth / 2 ? "left" : "right";
       setInfoAlign(align);
-      const infoWidth = 360;
-      const infoBlockHeight = 320;
-      let top = rect.top;
-      if (top + infoBlockHeight > window.innerHeight - 10) {
-        top = window.innerHeight - infoBlockHeight - 10;
-      }
-      if (top < 10) top = 10;
-      const left =
-        align === "right" ? rect.right + 200 : rect.left - infoWidth + 120;
-      setInfoPos({ left, top });
     }
     setInfoVisible(true);
   };
@@ -641,23 +585,7 @@ const FormCard: React.FC<FormCardProps> = ({
 
   return (
     <div
-      style={{
-        position: "relative",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        cursor: "pointer",
-        background: "rgba(255,255,255,0.01)",
-        borderRadius: 10,
-        boxShadow: "0 0 0 2px transparent",
-        transition: "box-shadow 0.2s",
-        padding: 6,
-        width: "auto",
-        height: "auto",
-        minWidth: 0,
-        minHeight: 0,
-      }}
+      className={formCardStyles.card}
       ref={cardRef}
       onClick={editable ? handleModalOpen : !editable ? showInfo : undefined}
       onMouseEnter={() => {
@@ -671,47 +599,15 @@ const FormCard: React.FC<FormCardProps> = ({
     >
       {/* Мишени над формой */}
       {challengeCount > 0 && (
-        <span
-          style={{
-            position: "absolute",
-            top: -58,
-            left: "55%",
-            transform: "translateX(-50%)",
-            fontSize: 25,
-            zIndex: 2,
-            pointerEvents: "none",
-            display: "flex",
-            flexDirection: "row",
-            gap: 4,
-          }}
-        >
+        <span className={formCardStyles.challengesAbove}>
           {Array.from({ length: challengeCount }).map((_, i) => (
             <span key={i}>🎯</span>
           ))}
         </span>
       )}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          fontWeight: 600,
-          background: "none",
-          border: "none",
-          boxShadow: "none",
-          color: "#222",
-          fontSize: 16,
-          lineHeight: 1.2,
-          padding: 0,
-          margin: 0,
-          userSelect: "none",
-          rowGap: 2,
-          transition: "color 0.2s",
-          width: "auto",
-        }}
-      >
-        <span style={{ fontSize: 12 }}>{player1}</span>
-        <span style={{ fontSize: 12 }}>{player2}</span>
+      <div className={formCardStyles.playersBlock}>
+        <span className={formCardStyles.player}>{player1}</span>
+        <span className={formCardStyles.player}>{player2}</span>
       </div>
       {/* Информационный блок для обычных пользователей */}
       {!editable && (
@@ -728,21 +624,17 @@ const FormCard: React.FC<FormCardProps> = ({
           winner={winner}
           challenges={challenges}
           align={infoAlign}
-          left={infoPos.left}
-          top={infoPos.top}
+          left={0}
+          top={0}
           date={editData.date || date}
           videoLink={editData.videoLink || videoLink}
-          className={
-            (infoAlign === "right"
-              ? styles.infoBlockRight
-              : styles.infoBlockLeft) + " info-block"
-          }
+          className={""}
           onMouseEnter={() => setInfoHovered(true)}
           onMouseLeave={() => {
             setInfoHovered(false);
             hideInfo();
           }}
-          style={{ width: "max-content", minWidth: 180 }}
+          style={{}}
         />
       )}
       {/* Модальное окно для админа */}
