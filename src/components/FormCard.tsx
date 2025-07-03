@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import ReactDOM from "react-dom";
-import "../styles/ModalCustom.css";
+import styles from "@/styles/ModalCustom.module.css";
 
 export type FormCardProps = {
   player1: string;
@@ -318,11 +318,11 @@ const Modal: React.FC<{
 }> = ({ open, onCancel, title, children, footer }) => {
   if (!open) return null;
   return ReactDOM.createPortal(
-    <div className="modal-overlay" onClick={onCancel}>
-      <div className="modal-window" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-title">
+    <div className={styles.modalOverlay} onClick={onCancel}>
+      <div className={styles.modalWindow} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.modalTitle}>
           {title}
-          <button className="modal-close" onClick={onCancel}>
+          <button className={styles.modalClose} onClick={onCancel}>
             ×
           </button>
         </div>
@@ -372,7 +372,9 @@ const InfoBlock: React.FC<{
   const challengeList = (challenges || "").split("\n").filter(Boolean);
   return ReactDOM.createPortal(
     <div
-      className={`info-block ${className} info-block--${align}`}
+      className={`${styles.infoBlock} ${className} ${
+        align === "right" ? styles.infoBlockRight : styles.infoBlockLeft
+      }`}
       style={{ position: "fixed", left, top, zIndex: 9999 }}
     >
       <div
@@ -657,7 +659,9 @@ const FormCard: React.FC<FormCardProps> = ({
           align={infoAlign}
           left={infoPos.left}
           top={infoPos.top}
-          className={`info-block--${infoAlign}`}
+          className={
+            infoAlign === "right" ? styles.infoBlockRight : styles.infoBlockLeft
+          }
         />
       )}
       {/* Модальное окно для админа */}

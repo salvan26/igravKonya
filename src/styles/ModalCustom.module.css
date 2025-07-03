@@ -1,4 +1,4 @@
-.modal-overlay {
+.modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -12,7 +12,7 @@
   z-index: 1000;
 }
 
-.modal-window {
+.modalWindow {
   background-color: #222121;
   border-radius: 8px;
   padding: 24px;
@@ -22,7 +22,7 @@
   overflow: auto;
 }
 
-.modal-title {
+.modalTitle {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -31,7 +31,7 @@
   font-weight: bold;
 }
 
-.modal-close {
+.modalClose {
   background: none;
   border: none;
   font-size: 18px;
@@ -41,7 +41,7 @@
   height: 24px;
 }
 
-.info-block {
+.infoBlock {
   position: absolute;
   left: 150%;
   top: 110%;
@@ -58,7 +58,7 @@
   max-height: 320px;
 }
 
-.info-block::before {
+.infoBlock::before {
   content: "";
   position: absolute;
   left: 0;
@@ -69,7 +69,7 @@
   border-radius: 2px;
 }
 
-.info-block::after {
+.infoBlock::after {
   content: "";
   position: absolute;
   right: 0;
@@ -80,13 +80,14 @@
   border-radius: 2px;
 }
 
-.info-block--right {
+.infoBlockRight {
   left: 300px;
   top: -50px;
   right: auto;
   margin-left: 4px;
 }
-.info-block--left {
+
+.infoBlockLeft {
   left: auto;
   right: -100px;
   top: -50px;
