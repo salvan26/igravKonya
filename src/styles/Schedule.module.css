@@ -1,0 +1,63 @@
+.wrapper {
+  max-width: 700px;
+  margin: 40px auto 0 auto;
+  background: #3a2f18;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px #0008;
+  padding: 32px 24px 24px 24px;
+  min-height: 400px;
+}
+
+.title {
+  color: #ffb357;
+  font-family: "Press Start 2P", monospace, sans-serif;
+  font-size: 2.2rem;
+  text-align: center;
+  margin-bottom: 32px;
+  letter-spacing: 2px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #2a2212;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.th {
+  background: #222121;
+  color: #ffb357;
+  font-size: 1.05rem;
+  padding: 12px 8px;
+  text-align: center;
+  font-family: "Press Start 2P", monospace, sans-serif;
+}
+
+.td {
+  padding: 12px 8px;
+  text-align: center;
+  font-size: 1.1rem;
+  font-family: "Press Start 2P", monospace, sans-serif;
+  color: #fff;
+}
+
+.tr:not(:last-child) {
+  border-bottom: 1px solid #4a3a1a;
+}
+
+.player a {
+  color: #ffb357;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.player a:hover {
+  color: #fff;
+}
+
+.vs {
+  color: #ffb357;
+  font-weight: bold;
+  font-size: 1.1rem;
+}

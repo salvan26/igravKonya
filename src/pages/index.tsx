@@ -2,7 +2,7 @@ import Link from "next/link";
 import FormCard from "@/components/FormCard";
 import { useEffect, useState } from "react";
 import { getAllForms, saveForm, FormData } from "@/utils/firestoreForms";
-import AdminButton from "@/components/AdminButton";
+
 const defaultForms: FormData[] = [
   { id: 1, player1: "Player A", player2: "Player B", top: "5%", left: "7%" },
 ];
@@ -91,7 +91,6 @@ export default function Home() {
             </div>
           ))}
       </div>
-      <AdminButton />
     </div>
   );
 }

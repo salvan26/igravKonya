@@ -1,0 +1,53 @@
+.header {
+  width: 100vw;
+  background: #222121;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 64px;
+  box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.nav {
+  display: flex;
+  gap: 32px;
+}
+
+.link {
+  color: #ffb357;
+  font-size: 1.3rem;
+  font-family: "Press Start 2P", monospace, sans-serif;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.link:hover {
+  color: #fff;
+}
+
+.adminBtn {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.adminBtn :global(.admin-btn) {
+  position: static !important;
+  background: none;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  box-shadow: none;
+  padding: 0 8px;
+  margin-left: 16px;
+  transition: filter 0.2s;
+}
+
+.adminBtn :global(.admin-btn):hover {
+  filter: brightness(1.3);
+}

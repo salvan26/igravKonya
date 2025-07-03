@@ -14,6 +14,8 @@ export type FormCardProps = {
   winner?: 0 | 1 | 2;
   challenges?: string;
   editable?: boolean;
+  date?: string;
+  videoLink?: string;
   onChange?: (data: {
     player1: string;
     player2: string;
@@ -25,6 +27,8 @@ export type FormCardProps = {
     heroImg2?: string;
     winner?: 0 | 1 | 2;
     challenges?: string;
+    date?: string;
+    videoLink?: string;
   }) => void;
 };
 
@@ -350,7 +354,12 @@ const InfoBlock: React.FC<{
   align?: "left" | "right";
   left?: number;
   top?: number;
+  date?: string;
+  videoLink?: string;
   className?: string;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
+  style?: React.CSSProperties;
 }> = ({
   visible,
   player1,
@@ -366,7 +375,12 @@ const InfoBlock: React.FC<{
   align = "right",
   left = 0,
   top = 0,
+  date,
+  videoLink,
   className = "",
+  onMouseEnter,
+  onMouseLeave,
+  style,
 }) => {
   if (!visible) return null;
   const challengeList = (challenges || "").split("\n").filter(Boolean);
@@ -375,7 +389,9 @@ const InfoBlock: React.FC<{
       className={`${styles.infoBlock} ${className} ${
         align === "right" ? styles.infoBlockRight : styles.infoBlockLeft
       }`}
-      style={{ position: "fixed", left, top, zIndex: 9999 }}
+      style={{ position: "fixed", left, top, zIndex: 9999, ...style }}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     >
       <div
         style={{
@@ -424,6 +440,7 @@ const InfoBlock: React.FC<{
             {score}
           </span>
         )}
+
         <span
           style={{
             fontWeight: winner === 2 ? 800 : 300,
@@ -459,6 +476,19 @@ const InfoBlock: React.FC<{
           />
         )}
       </div>
+      {videoLink && (
+        <div style={{ marginTop: 8, fontSize: "14px", color: "#fff" }}>
+          Летопись битвы:{" "}
+          <a
+            href={videoLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "#1890ff" }}
+          >
+            ▶️
+          </a>
+        </div>
+      )}
       {details && (
         <ul style={{ fontSize: "14px", color: "#fff", paddingLeft: 18 }}>
           {details.split("\n").map((line, i) => (
@@ -466,6 +496,7 @@ const InfoBlock: React.FC<{
           ))}
         </ul>
       )}
+
       {challengeList.length > 0 && (
         <ul
           style={{
@@ -489,6 +520,11 @@ const InfoBlock: React.FC<{
             </li>
           ))}
         </ul>
+      )}
+      {date && (
+        <div style={{ marginTop: 8, fontSize: "14px", color: "#fff" }}>
+          Дата: {date}
+        </div>
       )}
     </div>,
     document.body
@@ -514,6 +550,8 @@ const FormCard: React.FC<FormCardProps> = ({
   winner,
   challenges,
   editable,
+  date,
+  videoLink,
   onChange,
 }) => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -535,7 +573,11 @@ const FormCard: React.FC<FormCardProps> = ({
     heroImg2: heroImg2 || "",
     winner: (winner ?? 0) as 0 | 1 | 2,
     challenges: challenges || "",
+    date: date || "",
+    videoLink: videoLink || "",
   });
+  const [cardHovered, setCardHovered] = useState(false);
+  const [infoHovered, setInfoHovered] = useState(false);
 
   const handleModalOpen = () => {
     setEditData({
@@ -549,6 +591,8 @@ const FormCard: React.FC<FormCardProps> = ({
       heroImg2: heroImg2 || "",
       winner: (winner ?? 0) as 0 | 1 | 2,
       challenges: challenges || "",
+      date: date || "",
+      videoLink: videoLink || "",
     });
     setModalOpen(true);
   };
@@ -563,7 +607,7 @@ const FormCard: React.FC<FormCardProps> = ({
     setModalOpen(false);
   };
 
-  // Показывать инфоблок только при наведении на форму
+  // Показывать инфоблок только при наведении на форму, но не закрывать по клику на форму
   const showInfo = () => {
     if (cardRef.current) {
       const rect = cardRef.current.getBoundingClientRect();
@@ -578,12 +622,17 @@ const FormCard: React.FC<FormCardProps> = ({
       }
       if (top < 10) top = 10;
       const left =
-        align === "right" ? rect.right + 200 : rect.left - infoWidth + 180;
+        align === "right" ? rect.right + 200 : rect.left - infoWidth + 120;
       setInfoPos({ left, top });
     }
     setInfoVisible(true);
   };
-  const hideInfo = () => setInfoVisible(false);
+  // Не скрываем инфоблок по клику на форму
+  const hideInfo = (e?: React.MouseEvent) => {
+    // Если клик был внутри инфоблока — не скрывать
+    if (e && (e.target as HTMLElement).closest(".info-block")) return;
+    setInfoVisible(false);
+  };
 
   // В форме выводим мишени
   const challengeCount = (editData.challenges || "")
@@ -591,7 +640,35 @@ const FormCard: React.FC<FormCardProps> = ({
     .filter(Boolean).length;
 
   return (
-    <div style={{ position: "relative" }} ref={cardRef}>
+    <div
+      style={{
+        position: "relative",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        cursor: "pointer",
+        background: "rgba(255,255,255,0.01)",
+        borderRadius: 10,
+        boxShadow: "0 0 0 2px transparent",
+        transition: "box-shadow 0.2s",
+        padding: 6,
+        width: "auto",
+        height: "auto",
+        minWidth: 0,
+        minHeight: 0,
+      }}
+      ref={cardRef}
+      onClick={editable ? handleModalOpen : !editable ? showInfo : undefined}
+      onMouseEnter={() => {
+        setCardHovered(true);
+        if (!editable) showInfo();
+      }}
+      onMouseLeave={() => {
+        setCardHovered(false);
+        if (!editable) hideInfo();
+      }}
+    >
       {/* Мишени над формой */}
       {challengeCount > 0 && (
         <span
@@ -603,8 +680,8 @@ const FormCard: React.FC<FormCardProps> = ({
             fontSize: 25,
             zIndex: 2,
             pointerEvents: "none",
-            display: "flex", // добавлено!
-            flexDirection: "row", // добавлено!
+            display: "flex",
+            flexDirection: "row",
             gap: 4,
           }}
         >
@@ -615,13 +692,9 @@ const FormCard: React.FC<FormCardProps> = ({
       )}
       <div
         style={{
-          display: "grid",
-          gridTemplateRows: "1fr 1fr",
+          display: "flex",
+          flexDirection: "column",
           alignItems: "center",
-          justifyItems: "center",
-          minWidth: 120,
-          minHeight: 40,
-          cursor: "pointer",
           fontWeight: 600,
           background: "none",
           border: "none",
@@ -634,13 +707,11 @@ const FormCard: React.FC<FormCardProps> = ({
           userSelect: "none",
           rowGap: 2,
           transition: "color 0.2s",
+          width: "auto",
         }}
-        onClick={editable ? handleModalOpen : undefined}
-        onMouseEnter={!editable ? showInfo : undefined}
-        onMouseLeave={!editable ? hideInfo : undefined}
       >
-        <span style={{ fontSize: 16 }}>{player1}</span>
-        <span style={{ fontSize: 16 }}>{player2}</span>
+        <span style={{ fontSize: 12 }}>{player1}</span>
+        <span style={{ fontSize: 12 }}>{player2}</span>
       </div>
       {/* Информационный блок для обычных пользователей */}
       {!editable && (
@@ -659,9 +730,19 @@ const FormCard: React.FC<FormCardProps> = ({
           align={infoAlign}
           left={infoPos.left}
           top={infoPos.top}
+          date={editData.date || date}
+          videoLink={editData.videoLink || videoLink}
           className={
-            infoAlign === "right" ? styles.infoBlockRight : styles.infoBlockLeft
+            (infoAlign === "right"
+              ? styles.infoBlockRight
+              : styles.infoBlockLeft) + " info-block"
           }
+          onMouseEnter={() => setInfoHovered(true)}
+          onMouseLeave={() => {
+            setInfoHovered(false);
+            hideInfo();
+          }}
+          style={{ width: "max-content", minWidth: 180 }}
         />
       )}
       {/* Модальное окно для админа */}
@@ -841,6 +922,28 @@ const FormCard: React.FC<FormCardProps> = ({
               }
               placeholder="Каждая строка — отдельный челлендж"
               rows={3}
+            />
+            <label style={{ display: "block", margin: "8px 0 4px" }}>
+              Дата (например, 03.07):
+            </label>
+            <Input
+              value={editData.date}
+              onChange={(e) =>
+                setEditData((d) => ({ ...d, date: e.target.value }))
+              }
+              placeholder="Дата игры (03.07)"
+              style={{ width: 120 }}
+            />
+            <label style={{ display: "block", margin: "8px 0 4px" }}>
+              Ссылка на видео:
+            </label>
+            <Input
+              value={editData.videoLink}
+              onChange={(e) =>
+                setEditData((d) => ({ ...d, videoLink: e.target.value }))
+              }
+              placeholder="https://..."
+              style={{ width: 180 }}
             />
           </>
         ) : details ? (
