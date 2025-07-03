@@ -2,6 +2,7 @@ import Link from "next/link";
 import FormCard from "@/components/FormCard";
 import { useEffect, useState } from "react";
 import { getAllForms, saveForm, FormData } from "@/utils/firestoreForms";
+import formCardStyles from "@/components/FormCard.module.css";
 
 const defaultForms: FormData[] = [
   { id: 1, player1: "Player A", player2: "Player B", top: "5%", left: "7%" },
@@ -70,18 +71,8 @@ export default function Home() {
           formData.map((f) => (
             <div
               key={f.id}
-              style={{
-                position: "absolute",
-                top: f.top,
-                left: f.left,
-                transform: "translate(-50%, -50%)",
-                zIndex: 2,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                pointerEvents: "auto",
-              }}
+              className={formCardStyles.formCardWrapper}
+              style={{ top: f.top, left: f.left }}
             >
               <FormCard
                 {...f}

@@ -1,16 +1,19 @@
 import styles from "@/styles/Schedule.module.css";
-
-const games = [
-  {
-    date: "14.06",
-    time: "18:00",
-    player1: "valerie_rayne",
-    player2: "Pavllovich",
-  },
-  { date: "15.06", time: "19:00", player1: "Игрок 3", player2: "Игрок 4" },
-];
+import { useEffect, useState } from "react";
+import { getAllSchedule, ScheduleGame } from "@/utils/firestoreForms";
 
 export default function Schedule() {
+  const [games, setGames] = useState<ScheduleGame[]>([]);
+  useEffect(() => {
+    let mounted = true;
+    getAllSchedule().then((data) => {
+      if (mounted) setGames(data.sort((a, b) => a.date.localeCompare(b.date)));
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   return (
     <div className={styles.wrapper}>
       <h1 className={styles.title}>Расписание</h1>
